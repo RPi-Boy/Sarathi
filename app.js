@@ -74,7 +74,7 @@ const callOpenRouter = async (preferences) => {
     throw new Error('Missing OPENROUTER_API_KEY in .env');
   }
 
-  const model = process.env.GEMINI_MODEL || 'google/gemini-3.0-pro';
+  const model = process.env.GEMINI_MODEL || 'openai/gpt-5-mini';
   const referer = process.env.OPENROUTER_REFERRER || 'http://localhost:3000';
   const prompt = buildPromptFromPreferences(preferences);
 
