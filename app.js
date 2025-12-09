@@ -110,6 +110,136 @@ const callOpenRouter = async (preferences) => {
   return itinerary;
 };
 
+const PLACEHOLDER_IMAGES = [
+  {
+    id: 'placeholder-aurora',
+    url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
+    thumb: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80',
+    description: 'Aurora over a coastal ridge',
+    photographer: 'Roxanne Desgagnés',
+    photographerLink: 'https://unsplash.com/@roxannerhoads',
+  },
+  {
+    id: 'placeholder-desert',
+    url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=80',
+    thumb: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80',
+    description: 'Golden dunes at dusk',
+    photographer: 'Nathan McBride',
+    photographerLink: 'https://unsplash.com/@nathanmcbride',
+  },
+  {
+    id: 'placeholder-city',
+    url: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=1600&q=80',
+    thumb: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=400&q=80',
+    description: 'City skyline at twilight',
+    photographer: 'Denys Nevozhai',
+    photographerLink: 'https://unsplash.com/@dnevozhai',
+  },
+  {
+    id: 'placeholder-lake',
+    url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80',
+    thumb: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+    description: 'Mirror lake among alpine peaks',
+    photographer: 'Danielle MacInnes',
+    photographerLink: 'https://unsplash.com/@dmacinnes',
+  },
+  {
+    id: 'placeholder-jungle',
+    url: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1600&q=80',
+    thumb: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=400&q=80',
+    description: 'Mist rolling over rainforest cliffs',
+    photographer: 'Paul Carmona',
+    photographerLink: 'https://unsplash.com/@paulcar',
+  },
+  {
+    id: 'placeholder-coast',
+    url: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1600&q=80',
+    thumb: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80',
+    description: 'Sunset on dramatic coastline',
+    photographer: 'Luca Bravo',
+    photographerLink: 'https://unsplash.com/@lucabravo',
+  },
+];
+
+const formatUnsplashPhotos = (results = []) =>
+  results
+    .filter((photo) => photo?.urls?.regular)
+    .map((photo) => ({
+      id: photo.id,
+      url: `${photo.urls.regular}&auto=format&fit=crop&w=1600&q=80`,
+      thumb: `${photo.urls.small}&auto=format&fit=crop&w=400&q=80`,
+      description: photo.description || photo.alt_description || 'Travel inspiration',
+      photographer: photo.user?.name,
+      photographerLink: photo.user?.links?.html,
+    }));
+
+const fetchUnsplashPhotos = async (query, apiKey) => {
+  const searchUrl = new URL('https://api.unsplash.com/search/photos');
+  searchUrl.searchParams.set('query', query);
+  searchUrl.searchParams.set('per_page', '10');
+  searchUrl.searchParams.set('orientation', 'landscape');
+  searchUrl.searchParams.set('content_filter', 'high');
+
+  const response = await fetch(searchUrl.toString(), {
+    headers: {
+      Authorization: `Client-ID ${apiKey}`,
+      'Accept-Version': 'v1',
+    },
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Unsplash error (${response.status}): ${errText}`);
+  }
+
+  const data = await response.json();
+  return formatUnsplashPhotos(data?.results || []);
+};
+
+const getDestinationMedia = async (destination) => {
+  const apiKey = process.env.UNSPLASH_ACCESS_KEY;
+  if (!apiKey) {
+    return {
+      images: PLACEHOLDER_IMAGES,
+      source: 'placeholder',
+      reason: 'UNSPLASH_ACCESS_KEY missing in environment.',
+    };
+  }
+
+  const trimmed = destination.trim();
+  const primary = trimmed.split(',')[0];
+  const candidateQueries = Array.from(
+    new Set([
+      trimmed,
+      `${primary} skyline`,
+      `${primary} landmarks`,
+      `${primary} travel`,
+      'inspiring travel destinations',
+    ]),
+  );
+
+  for (const query of candidateQueries) {
+    try {
+      const photos = await fetchUnsplashPhotos(query, apiKey);
+      if (photos.length) {
+        return {
+          images: photos.slice(0, 10),
+          source: 'unsplash',
+          query,
+        };
+      }
+    } catch (error) {
+      console.warn(`Unsplash query failed for "${query}":`, error.message || error);
+    }
+  }
+
+  return {
+    images: PLACEHOLDER_IMAGES,
+    source: 'placeholder',
+    reason: 'Unsplash returned no usable results.',
+  };
+};
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -173,6 +303,25 @@ app.post('/api/preferences', (req, res) => {
 
 app.get('/api/preferences', (req, res) => {
   res.json({ preferences: req.session.preferences || null });
+});
+
+app.get('/api/destination-media', async (req, res) => {
+  const destinationQuery = (req.query.q || '').trim();
+  if (!destinationQuery) {
+    return res.status(400).json({ error: 'Destination query is required.' });
+  }
+
+  try {
+    const payload = await getDestinationMedia(destinationQuery);
+    res.json(payload);
+  } catch (error) {
+    console.error('Destination media error:', error);
+    res.json({
+      images: PLACEHOLDER_IMAGES,
+      source: 'placeholder',
+      reason: error.message || 'Failed to resolve destination imagery.',
+    });
+  }
 });
 
 app.post('/api/signup', async (req, res) => {

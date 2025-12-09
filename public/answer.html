@@ -14,6 +14,7 @@
   </head>
   <body>
     <div class="page-transition"></div>
+    <div id="dynamicBackdrop" class="dynamic-backdrop"></div>
     <div class="floating-orb orb-primary"></div>
     <div class="floating-orb orb-secondary"></div>
 
@@ -96,6 +97,27 @@
             </div>
           </form>
         </aside>
+      </section>
+
+      <section class="media-gallery">
+        <div class="glass-card media-card">
+          <div class="media-header">
+            <div>
+              <p class="tagline">Atmospheric cues</p>
+              <h3>Scene mood board</h3>
+            </div>
+            <div class="media-meta">
+              <span id="mediaSource" class="muted">Awaiting destination...</span>
+            </div>
+          </div>
+          <div class="media-carousel-wrapper">
+            <button class="carousel-btn" id="mediaPrev" aria-label="Previous image">‹</button>
+            <div class="media-carousel" id="mediaCarousel">
+              <p class="muted" id="mediaPlaceholder">Add a destination to paint the canvas.</p>
+            </div>
+            <button class="carousel-btn" id="mediaNext" aria-label="Next image">›</button>
+          </div>
+        </div>
       </section>
     </div>
 

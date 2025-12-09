@@ -28,6 +28,8 @@ body {
   color: var(--text-primary);
   font-family: "Space Grotesk", system-ui, sans-serif;
   line-height: 1.5;
+  position: relative;
+  overflow-x: hidden;
 }
 
 body::before,
@@ -41,6 +43,22 @@ body::after {
   filter: blur(80px);
 }
 
+.dynamic-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.5) saturate(1.2);
+  opacity: 0;
+  transition: opacity 0.8s ease, transform 1.2s ease;
+}
+
+.dynamic-backdrop.visible {
+  opacity: 1;
+  transform: scale(1.02);
+}
+
 a {
   color: inherit;
 }
@@ -50,6 +68,7 @@ a {
   margin: 0 auto;
   padding: 32px clamp(20px, 4vw, 48px) 64px;
   position: relative;
+  z-index: 1;
 }
 
 .floating-orb {
@@ -417,11 +436,128 @@ body.transitioning .page-transition {
   display: none !important;
 }
 
+.media-gallery {
+  margin-top: 48px;
+}
+
+.media-card {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.media-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.media-header h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem;
+}
+
+.media-meta {
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.media-carousel-wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.media-carousel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  overflow: hidden;
+  position: relative;
+  min-height: 180px;
+}
+
+.media-slide {
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  min-height: 180px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.media-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s ease;
+}
+
+.media-slide:hover img {
+  transform: scale(1.08);
+}
+
+.media-slide figcaption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px;
+  background: linear-gradient(180deg, transparent, rgba(5, 7, 15, 0.8));
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.media-slide figcaption a {
+  color: var(--mint);
+  text-decoration: none;
+}
+
+.carousel-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.carousel-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.carousel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.media-carousel.single {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
 @media (max-width: 960px) {
   .answer-layout {
     grid-template-columns: 1fr;
   }
 
+  .media-carousel-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .carousel-btn {
+    justify-self: center;
+    order: 3;
+  }
+}
+
+@media (max-width: 560px) {
   .nav-bar {
     flex-direction: column;
     gap: 16px;

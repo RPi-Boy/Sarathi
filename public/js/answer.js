@@ -6,9 +6,18 @@ const regenerateBtn = document.getElementById('regenerateBtn');
 const exportBtn = document.getElementById('exportBtn');
 const sessionBtn = document.getElementById('sessionBtn');
 const logoutBtn = document.getElementById('logoutBtn');
+const backdropEl = document.getElementById('dynamicBackdrop');
+const mediaCarousel = document.getElementById('mediaCarousel');
+const mediaPrev = document.getElementById('mediaPrev');
+const mediaNext = document.getElementById('mediaNext');
+const mediaSourceEl = document.getElementById('mediaSource');
+const mediaPlaceholder = document.getElementById('mediaPlaceholder');
 
 let isAuthenticated = false;
 let latestPreferences = {};
+let mediaImages = [];
+let mediaIndex = 0;
+const VISIBLE_MEDIA_COUNT = 3;
 
 const setStatus = (text, isError = false) => {
   if (statusEl) {
@@ -25,6 +34,126 @@ const setAlert = (text) => {
   } else {
     alertEl.classList.remove('hidden');
     alertEl.textContent = text;
+  }
+};
+
+const applyBackdrop = (imageUrl) => {
+  if (!backdropEl) return;
+  if (imageUrl) {
+    backdropEl.style.backgroundImage = `url(${imageUrl})`;
+    backdropEl.classList.add('visible');
+  } else {
+    backdropEl.style.backgroundImage = '';
+    backdropEl.classList.remove('visible');
+  }
+};
+
+const updateMediaSource = (text) => {
+  if (!mediaSourceEl) return;
+  mediaSourceEl.textContent = text;
+};
+
+const renderMediaCarousel = () => {
+  if (!mediaCarousel) return;
+  mediaCarousel.innerHTML = '';
+
+  if (!mediaImages.length) {
+    if (mediaPlaceholder) {
+      mediaPlaceholder.classList.remove('hidden');
+    }
+    if (mediaPrev) mediaPrev.disabled = true;
+    if (mediaNext) mediaNext.disabled = true;
+    applyBackdrop(null);
+    return;
+  }
+
+  if (mediaPlaceholder) {
+    mediaPlaceholder.classList.add('hidden');
+  }
+
+  const fragment = document.createDocumentFragment();
+  const windowed = mediaImages.length <= VISIBLE_MEDIA_COUNT ? mediaImages : [];
+
+  if (!windowed.length) {
+    for (let i = 0; i < VISIBLE_MEDIA_COUNT; i += 1) {
+      const idx = (mediaIndex + i) % mediaImages.length;
+      windowed.push(mediaImages[idx]);
+    }
+  }
+
+  windowed.forEach((photo) => {
+    const slide = document.createElement('figure');
+    slide.className = 'media-slide';
+
+    const img = document.createElement('img');
+    img.src = photo.url;
+    img.alt = photo.description || 'Destination inspiration';
+    slide.appendChild(img);
+
+    const caption = document.createElement('figcaption');
+    const descSpan = document.createElement('span');
+    descSpan.textContent = photo.description || 'Destination inspiration';
+    caption.appendChild(descSpan);
+
+    if (photo.photographer && photo.photographerLink) {
+      const separator = document.createTextNode(' · ');
+      caption.appendChild(separator);
+      const creditLink = document.createElement('a');
+      creditLink.href = photo.photographerLink;
+      creditLink.target = '_blank';
+      creditLink.rel = 'noopener noreferrer';
+      creditLink.textContent = photo.photographer;
+      caption.appendChild(creditLink);
+    }
+
+    slide.appendChild(caption);
+    fragment.appendChild(slide);
+  });
+
+  mediaCarousel.classList.toggle('single', mediaImages.length <= 2);
+  mediaCarousel.appendChild(fragment);
+
+  if (mediaPrev) {
+    mediaPrev.disabled = mediaImages.length <= VISIBLE_MEDIA_COUNT;
+  }
+  if (mediaNext) {
+    mediaNext.disabled = mediaImages.length <= VISIBLE_MEDIA_COUNT;
+  }
+
+  applyBackdrop(mediaImages[mediaIndex]?.url);
+};
+
+const loadDestinationMedia = async (destination) => {
+  if (!destination) {
+    mediaImages = [];
+    mediaIndex = 0;
+    updateMediaSource('Add a destination to paint the canvas.');
+    renderMediaCarousel();
+    return;
+  }
+
+  updateMediaSource('Curating atmosphere...');
+  try {
+    const response = await fetch(`/api/destination-media?q=${encodeURIComponent(destination)}`);
+    const data = await response.json();
+    mediaImages = Array.isArray(data.images) ? data.images : [];
+    mediaIndex = 0;
+
+    if (data?.source === 'unsplash' && data.query) {
+      updateMediaSource(`Images via Unsplash · ${data.query}`);
+    } else if (data?.source === 'placeholder') {
+      updateMediaSource('Showing curated inspiration');
+    } else {
+      updateMediaSource('Images refreshed.');
+    }
+
+    renderMediaCarousel();
+  } catch (error) {
+    console.error('Failed to load destination media', error);
+    updateMediaSource('Unable to load imagery. Showing curated placeholders.');
+    mediaImages = [];
+    mediaIndex = 0;
+    renderMediaCarousel();
   }
 };
 
@@ -45,6 +174,9 @@ const fetchPreferences = async () => {
     if (data?.preferences) {
       latestPreferences = data.preferences;
       fillForm(latestPreferences);
+      if (latestPreferences.destination) {
+        await loadDestinationMedia(latestPreferences.destination);
+      }
     }
   } catch (error) {
     console.error('Failed to fetch preferences', error);
@@ -117,6 +249,7 @@ const handleGeneration = async (payload, message = 'Crafting your route...') => 
     itineraryOutput.textContent = itinerary;
     latestPreferences = payload;
     setStatus('Itinerary refreshed.');
+    await loadDestinationMedia(payload.destination);
   } catch (error) {
     console.error(error);
     setStatus('We hit turbulence.', true);
@@ -137,6 +270,22 @@ if (regenerateBtn) {
   regenerateBtn.addEventListener('click', async () => {
     if (!isAuthenticated) return;
     await handleGeneration(latestPreferences, 'Regenerating with a fresh perspective...');
+  });
+}
+
+if (mediaPrev) {
+  mediaPrev.addEventListener('click', () => {
+    if (!mediaImages.length || mediaPrev.disabled) return;
+    mediaIndex = (mediaIndex - 1 + mediaImages.length) % mediaImages.length;
+    renderMediaCarousel();
+  });
+}
+
+if (mediaNext) {
+  mediaNext.addEventListener('click', () => {
+    if (!mediaImages.length || mediaNext.disabled) return;
+    mediaIndex = (mediaIndex + 1) % mediaImages.length;
+    renderMediaCarousel();
   });
 }
 
