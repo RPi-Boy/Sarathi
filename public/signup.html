@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sarathi · Sign up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="page-transition"></div>
+    <div class="floating-orb orb-primary"></div>
+    <div class="floating-orb orb-secondary"></div>
+
+    <div class="page-shell">
+      <nav class="nav-bar">
+        <div class="nav-left">
+          <a class="nav-login" href="/login">Login</a>
+          <a class="nav-brand" href="/">SARATHI</a>
+        </div>
+        <div class="nav-right">
+          <div class="pill">Claim your co-traveler</div>
+        </div>
+      </nav>
+
+      <section class="glass-card auth-card">
+        <h1 class="auth-title">Become a Sarathi traveler</h1>
+        <p class="answer-subhead">
+          Your preferences stay private on your device, while Sarathi orchestrates the rest.
+        </p>
+        <form id="signupForm">
+          <label>
+            First name
+            <input type="text" name="firstName" placeholder="Aisha" required />
+          </label>
+          <label>
+            Last name
+            <input type="text" name="lastName" placeholder="Verma" required />
+          </label>
+          <label>
+            Email address
+            <input type="email" name="email" placeholder="you@email.com" required />
+          </label>
+          <label>
+            Password
+            <input type="password" name="password" placeholder="Create a password" required />
+          </label>
+          <button class="btn" type="submit">Create account</button>
+          <p id="signupStatus" class="status-badge"></p>
+        </form>
+        <p class="auth-switch">
+          Already aboard? <a href="/login">Log in</a>
+        </p>
+      </section>
+    </div>
+
+    <script src="/js/signup.js" type="module"></script>
+  </body>
+</html>

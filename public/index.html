@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sarathi · Bespoke Travel Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="page-transition"></div>
+    <div class="floating-orb orb-primary"></div>
+    <div class="floating-orb orb-secondary"></div>
+
+    <div class="page-shell">
+      <nav class="nav-bar">
+        <div class="nav-left">
+          <a class="nav-login" href="/login">Login</a>
+          <a class="nav-brand" href="/">SARATHI</a>
+        </div>
+        <div class="nav-right">
+          <div class="pill">Intelligent travel choreography</div>
+        </div>
+      </nav>
+
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <p class="tagline">Craft the journey before it happens</p>
+          <h1>
+            A travel assistant that listens,<br />
+            then paints the<br />
+            <span>perfect itinerary.</span>
+          </h1>
+          <p>
+            Feed Sarathi with your constraints, tastes, and curiosities. Watch it weave
+            Michelin-grade dining, soulful detours, and pragmatic logistics into a single
+            itinerary you can trust.
+          </p>
+        </div>
+
+        <div class="glass-card">
+          <h2 style="margin-bottom: 18px">Plan a new escape</h2>
+          <form id="preferenceForm" class="form-grid">
+            <label>
+              Destination / Region
+              <input type="text" name="destination" placeholder="Kyoto, Amalfi, Patagonia..." required />
+            </label>
+            <label>
+              Dates / Timeframe
+              <input type="text" name="dates" placeholder="May 18 – 25, 2026" required />
+            </label>
+            <label>
+              Budget
+              <input type="text" name="budget" placeholder="$4k total" />
+            </label>
+            <label>
+              Travelers
+              <input type="number" min="1" name="passengers" placeholder="2" />
+            </label>
+            <label>
+              Interests
+              <input type="text" name="interests" placeholder="Architecture, cafes, artisan crafts" />
+            </label>
+            <label>
+              Preferred Weather
+              <select name="weather">
+                <option value="Warm and sunny">Warm & sunny</option>
+                <option value="Mild spring">Mild spring</option>
+                <option value="Crisp autumn">Crisp autumn</option>
+                <option value="Cozy winter">Cozy winter</option>
+              </select>
+            </label>
+            <label>
+              Travel Pace
+              <select name="pace">
+                <option value="Leisurely">Leisurely</option>
+                <option value="Balanced" selected>Balanced</option>
+                <option value="Fast-paced">Fast paced</option>
+              </select>
+            </label>
+            <label class="full-width">
+              Specific notes / must-dos
+              <textarea name="specialNotes" placeholder="Need a sunrise tea ceremony, avoid seafood, etc."></textarea>
+            </label>
+            <div class="full-width">
+              <button class="btn" type="submit">Summon Sarathi</button>
+              <p class="status-badge" id="formStatus"></p>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <script src="/js/home.js" type="module"></script>
+  </body>
+</html>

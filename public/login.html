@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sarathi · Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="page-transition"></div>
+    <div class="floating-orb orb-primary"></div>
+    <div class="floating-orb orb-secondary"></div>
+
+    <div class="page-shell">
+      <nav class="nav-bar">
+        <div class="nav-left">
+          <a class="nav-brand" href="/">SARATHI</a>
+          <div class="pill">Welcome back</div>
+        </div>
+        <a class="nav-login" href="/signup">Create account</a>
+      </nav>
+
+      <section class="glass-card auth-card">
+        <h1 class="auth-title">Log in</h1>
+        <p class="answer-subhead">Unlock regenerative itineraries, synced across your devices.</p>
+        <form id="loginForm">
+          <label>
+            Email address
+            <input type="email" name="email" placeholder="you@email.com" required />
+          </label>
+          <label>
+            Password
+            <input type="password" name="password" placeholder="••••••••" required />
+          </label>
+          <button class="btn" type="submit">Enter Sarathi</button>
+          <p id="loginStatus" class="status-badge"></p>
+        </form>
+        <p class="auth-switch">
+          New traveler? <a href="/signup">Create an account</a>
+        </p>
+      </section>
+    </div>
+
+    <script src="/js/login.js" type="module"></script>
+  </body>
+</html>
