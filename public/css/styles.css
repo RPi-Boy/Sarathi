@@ -286,8 +286,9 @@ textarea {
   transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
   color: #05070f;
   background: linear-gradient(120deg, var(--mint), var(--sand));
-  padding: 14px 26px;
+  padding: 10px 26px;
   width: 100%;
+  margin-top: 10px;
 }
 
 .btn:hover {
