@@ -12,9 +12,12 @@
     />
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
-  <body>
+  <body class="answer-page">
     <div class="page-transition"></div>
-    <div id="dynamicBackdrop" class="dynamic-backdrop"></div>
+    <div id="dynamicBackdrop" class="dynamic-backdrop">
+      <div class="backdrop-layer" data-layer="0"></div>
+      <div class="backdrop-layer" data-layer="1"></div>
+    </div>
     <div class="floating-orb orb-primary"></div>
     <div class="floating-orb orb-secondary"></div>
 
@@ -38,8 +41,9 @@
           <div id="itineraryOutput" class="itinerary-content">
             <p class="muted">We are ready to conjure something lovely. Submit preferences once more.</p>
           </div>
-          <div class="actions-row">
+          <div class="actions-row itinerary-actions">
             <button id="exportBtn" class="btn secondary-btn">Export itinerary as PDF</button>
+            <button id="readMoreBtn" class="btn tertiary-btn" type="button">View full itinerary</button>
           </div>
         </article>
 
@@ -119,6 +123,18 @@
           </div>
         </div>
       </section>
+    </div>
+
+    <div id="itineraryModal" class="itinerary-modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-overlay" data-modal-dismiss></div>
+      <div class="modal-panel">
+        <button class="modal-close" id="modalCloseBtn" aria-label="Close full itinerary">&times;</button>
+        <div class="modal-head">
+          <p class="tagline">Immersive view</p>
+          <h3>Full itinerary</h3>
+        </div>
+        <div id="modalItineraryContent" class="modal-body"></div>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIP7q1QnR6GgZ8+gjs53RNPFH+hQVFGkJzd8I1QKAmhpN6wX6Z1GDZsBoBPXaGNsq4CPGK/cHBXHi5Zk0Ztg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

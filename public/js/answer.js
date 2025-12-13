@@ -12,12 +12,19 @@ const mediaPrev = document.getElementById('mediaPrev');
 const mediaNext = document.getElementById('mediaNext');
 const mediaSourceEl = document.getElementById('mediaSource');
 const mediaPlaceholder = document.getElementById('mediaPlaceholder');
+const readMoreBtn = document.getElementById('readMoreBtn');
+const itineraryModal = document.getElementById('itineraryModal');
+const modalItineraryContent = document.getElementById('modalItineraryContent');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+const modalDismissEls = document.querySelectorAll('[data-modal-dismiss]');
 
 let isAuthenticated = false;
 let latestPreferences = {};
 let mediaImages = [];
 let mediaIndex = 0;
 const VISIBLE_MEDIA_COUNT = 3;
+let currentItineraryText = '';
+let backdropSwapTimeout;
 
 const setStatus = (text, isError = false) => {
   if (statusEl) {
@@ -39,11 +46,35 @@ const setAlert = (text) => {
 
 const applyBackdrop = (imageUrl) => {
   if (!backdropEl) return;
+  const layers = backdropEl.querySelectorAll('.backdrop-layer');
+  if (layers.length < 2) return;
+
+  const [layerA, layerB] = layers;
+  const activeLayer = layerA.classList.contains('active') ? layerA : layerB;
+  const nextLayer = activeLayer === layerA ? layerB : layerA;
+
+  if (backdropSwapTimeout) {
+    clearTimeout(backdropSwapTimeout);
+    backdropSwapTimeout = null;
+  }
+
   if (imageUrl) {
-    backdropEl.style.backgroundImage = `url(${imageUrl})`;
+    nextLayer.style.backgroundImage = `url(${imageUrl})`;
     backdropEl.classList.add('visible');
+    nextLayer.classList.add('active');
+    nextLayer.classList.remove('fading');
+
+    activeLayer.classList.remove('active');
+    activeLayer.classList.add('fading');
+
+    backdropSwapTimeout = setTimeout(() => {
+      activeLayer.classList.remove('fading');
+    }, 2000);
   } else {
-    backdropEl.style.backgroundImage = '';
+    [layerA, layerB].forEach((layer) => {
+      layer.style.backgroundImage = '';
+      layer.classList.remove('active', 'fading');
+    });
     backdropEl.classList.remove('visible');
   }
 };
@@ -51,6 +82,91 @@ const applyBackdrop = (imageUrl) => {
 const updateMediaSource = (text) => {
   if (!mediaSourceEl) return;
   mediaSourceEl.textContent = text;
+};
+
+const buildFormattedItinerary = (text = '') => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'formatted-itinerary';
+
+  if (!text.trim()) {
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = 'We are ready to conjure something lovely. Submit preferences once more.';
+    wrapper.appendChild(p);
+    return wrapper;
+  }
+
+  const segments = text.replace(/\r/g, '').split(/\n{2,}/);
+  segments.forEach((segment) => {
+    const trimmed = segment.trim();
+    if (!trimmed) return;
+
+    const lines = trimmed.split('\n').map((line) => line.trim()).filter(Boolean);
+    if (!lines.length) return;
+
+    const block = document.createElement('section');
+    block.className = 'itinerary-section';
+
+    const headingMatch = lines[0].match(/^(day\s*\d+[^\n:]*)[:\-]?\s*(.*)$/i);
+    if (headingMatch) {
+      const heading = document.createElement('h4');
+      heading.textContent = headingMatch[1].replace(/\s+/g, ' ').trim();
+      block.appendChild(heading);
+      const remainder = headingMatch[2]?.trim();
+      if (remainder) {
+        lines[0] = remainder;
+      } else {
+        lines.shift();
+      }
+    }
+
+    const hasListFeel = lines.filter((line) => /^[-•]/.test(line)).length >= Math.min(lines.length, 2);
+    if (hasListFeel) {
+      const list = document.createElement('ul');
+      list.className = 'itinerary-list';
+      lines.forEach((line) => {
+        if (!line) return;
+        if (/^[-•]/.test(line)) {
+          const item = document.createElement('li');
+          item.textContent = line.replace(/^[-•]\s*/, '');
+          list.appendChild(item);
+        } else {
+          const p = document.createElement('p');
+          p.textContent = line;
+          block.appendChild(p);
+        }
+      });
+      block.appendChild(list);
+    } else {
+      lines.forEach((line) => {
+        const p = document.createElement('p');
+        p.textContent = line;
+        block.appendChild(p);
+      });
+    }
+
+    wrapper.appendChild(block);
+  });
+
+  return wrapper;
+};
+
+const updateItineraryDisplay = (text) => {
+  currentItineraryText = text || '';
+  if (!itineraryOutput) return;
+
+  const formatted = buildFormattedItinerary(currentItineraryText);
+  itineraryOutput.replaceChildren(formatted.cloneNode(true));
+
+  if (modalItineraryContent) {
+    modalItineraryContent.replaceChildren(formatted);
+  }
+
+  if (readMoreBtn) {
+    const disabled = !currentItineraryText;
+    readMoreBtn.disabled = disabled;
+    readMoreBtn.setAttribute('aria-disabled', String(disabled));
+  }
 };
 
 const renderMediaCarousel = () => {
@@ -189,7 +305,7 @@ const fetchItinerary = async () => {
     if (!response.ok) return;
     const data = await response.json();
     if (data.itinerary) {
-      itineraryOutput.textContent = data.itinerary;
+      updateItineraryDisplay(data.itinerary);
     }
   } catch (error) {
     console.error('Failed to fetch itinerary', error);
@@ -246,7 +362,7 @@ const handleGeneration = async (payload, message = 'Crafting your route...') => 
   try {
     await submitPreferences(payload);
     const itinerary = await requestItinerary(payload);
-    itineraryOutput.textContent = itinerary;
+    updateItineraryDisplay(itinerary);
     latestPreferences = payload;
     setStatus('Itinerary refreshed.');
     await loadDestinationMedia(payload.destination);
@@ -288,6 +404,31 @@ if (mediaNext) {
     renderMediaCarousel();
   });
 }
+
+const toggleItineraryModal = (show) => {
+  if (!itineraryModal) return;
+  itineraryModal.classList.toggle('hidden', !show);
+  document.body?.classList.toggle('modal-open', show);
+};
+
+if (readMoreBtn) {
+  readMoreBtn.addEventListener('click', () => {
+    if (!currentItineraryText) return;
+    toggleItineraryModal(true);
+  });
+}
+
+modalDismissEls.forEach((el) => {
+  el.addEventListener('click', () => toggleItineraryModal(false));
+});
+
+modalCloseBtn?.addEventListener('click', () => toggleItineraryModal(false));
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && itineraryModal && !itineraryModal.classList.contains('hidden')) {
+    toggleItineraryModal(false);
+  }
+});
 
 if (exportBtn) {
   exportBtn.addEventListener('click', () => {

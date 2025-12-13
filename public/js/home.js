@@ -1,5 +1,9 @@
 const form = document.getElementById('preferenceForm');
 const statusEl = document.getElementById('formStatus');
+const mapBackdrop = document.getElementById('mapBackdrop');
+let cursorAnimationFrame;
+let cursorTarget = { x: 50, y: 50 };
+let currentCursor = { x: 50, y: 50 };
 
 const setStatus = (text, isError = false) => {
   if (!statusEl) return;
@@ -40,4 +44,29 @@ if (form) {
       setStatus('We hit light turbulence. Try again?', true);
     }
   });
+}
+
+const updateMapBackdrop = () => {
+  if (!mapBackdrop) return;
+  currentCursor.x += (cursorTarget.x - currentCursor.x) * 0.08;
+  currentCursor.y += (cursorTarget.y - currentCursor.y) * 0.08;
+  mapBackdrop.style.setProperty('--cursor-x', `${currentCursor.x}%`);
+  mapBackdrop.style.setProperty('--cursor-y', `${currentCursor.y}%`);
+  cursorAnimationFrame = requestAnimationFrame(updateMapBackdrop);
+};
+
+if (mapBackdrop) {
+  window.addEventListener('pointermove', (event) => {
+    const { innerWidth, innerHeight } = window;
+    cursorTarget = {
+      x: Math.max(0, Math.min(100, (event.clientX / innerWidth) * 100)),
+      y: Math.max(0, Math.min(100, (event.clientY / innerHeight) * 100)),
+    };
+  });
+
+  window.addEventListener('pointerleave', () => {
+    cursorTarget = { x: 50, y: 50 };
+  });
+
+  cursorAnimationFrame = requestAnimationFrame(updateMapBackdrop);
 }
