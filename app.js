@@ -279,6 +279,18 @@ app.get('/answer', (req, res) => {
   return res.sendFile(path.join(__dirname, 'public', 'answer.html'));
 });
 
+app.get('/about', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'about.html'));
+});
+
+app.get('/privacy', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+
+app.get('/terms', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'terms.html'));
+});
+
 app.get('/api/session', (req, res) => {
   res.json({
     authenticated: Boolean(req.session.user),
