@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css" />
@@ -25,38 +25,44 @@
       <span class="nav-brand-text">Sarathi</span>
     </a>
     <div class="nav-links">
-      <a class="nav-link" href="/">Launch AI Planner</a>
-      <a class="nav-link" href="#" onclick="alert('My Plans — coming soon!'); return false;">My Plans</a>
-      <a class="nav-link" href="#" onclick="alert('Journal — coming soon!'); return false;">Journal</a>
+      <a class="nav-link" href="/" data-i18n="nav.planner">Launch AI Planner</a>
+      <a class="nav-link" href="/plans" data-i18n="nav.plans">My Plans</a>
+      <a class="nav-link" href="/journal" data-i18n="nav.journal">Journal</a>
     </div>
     <div class="nav-spacer"></div>
-    <a class="nav-icon-btn" href="/signup" title="Create account">
+    <button class="lang-toggle" id="langToggleBtn" title="Switch language">
+      <span class="lang-current">EN</span><span class="lang-divider">|</span><span class="lang-alt">हि</span>
+    </button>
+    <a class="nav-icon-btn" href="/signup" data-i18n-title="nav.signup">
       <span class="material-icons">person_add</span>
     </a>
   </nav>
 
   <div class="page-shell">
     <section class="glass-card auth-card">
-      <h1 class="auth-title">Log in</h1>
-      <p class="answer-subhead">Unlock regenerative itineraries, synced across your devices.</p>
+      <h1 class="auth-title" data-i18n="login.title">Log in</h1>
+      <p class="answer-subhead" data-i18n="login.subtitle">Unlock regenerative itineraries, synced across your devices.
+      </p>
       <form id="loginForm">
         <label>
-          Email address
+          <span data-i18n="login.email">Email address</span>
           <input type="email" name="email" placeholder="you@email.com" required />
         </label>
         <label>
-          Password
+          <span data-i18n="login.password">Password</span>
           <input type="password" name="password" placeholder="••••••••" required />
         </label>
-        <button class="btn" type="submit">Enter Sarathi</button>
+        <button class="btn" type="submit" data-i18n="login.submit">Enter Sarathi</button>
         <p id="loginStatus" class="status-badge"></p>
       </form>
       <p class="auth-switch">
-        New traveler? <a href="/signup">Create an account</a>
+        <span data-i18n="login.switchText">New traveler?</span> <a href="/signup" data-i18n="login.switchLink">Create an
+          account</a>
       </p>
     </section>
   </div>
 
+  <script src="/js/i18n.js"></script>
   <script src="/js/login.js" type="module"></script>
 </body>
 

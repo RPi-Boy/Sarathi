@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css" />
@@ -41,12 +41,15 @@
       <span class="nav-brand-text">Sarathi</span>
     </a>
     <div class="nav-links">
-      <a class="nav-link active" href="#" id="launchPlannerNav">Launch AI Planner</a>
-      <a class="nav-link" href="#" onclick="alert('My Plans — coming soon!'); return false;">My Plans</a>
-      <a class="nav-link" href="#" onclick="alert('Journal — coming soon!'); return false;">Journal</a>
+      <a class="nav-link active" href="#" id="launchPlannerNav" data-i18n="nav.planner">Launch AI Planner</a>
+      <a class="nav-link" href="/plans" data-i18n="nav.plans">My Plans</a>
+      <a class="nav-link" href="/journal" data-i18n="nav.journal">Journal</a>
     </div>
     <div class="nav-spacer"></div>
-    <a class="nav-icon-btn" href="/login" id="navLoginBtn" title="Login">
+    <button class="lang-toggle" id="langToggleBtn" title="Switch language">
+      <span class="lang-current">EN</span><span class="lang-divider">|</span><span class="lang-alt">हि</span>
+    </button>
+    <a class="nav-icon-btn" href="/login" id="navLoginBtn" data-i18n-title="nav.login">
       <span class="material-icons">person</span>
     </a>
   </nav>
@@ -59,16 +62,16 @@
       <div class="phase-card">
         <div class="hero-badge">
           <span class="dot"></span>
-          AI-powered travel planning
+          <span data-i18n="home.badge">AI-powered travel planning</span>
         </div>
-        <h1 class="hero-title">Your journey,<br>imagined before<br>it begins.</h1>
-        <p class="hero-subtitle">
+        <h1 class="hero-title" data-i18n-html="home.title">Your journey,<br>imagined before<br>it begins.</h1>
+        <p class="hero-subtitle" data-i18n="home.subtitle">
           Feed Sarathi your constraints, tastes, and curiosities. Watch it weave Michelin-grade
           dining, soulful detours, and pragmatic logistics into a single itinerary you can trust.
         </p>
         <button class="hero-cta" id="launchPlannerHero">
           <span class="material-icons">explore</span>
-          Launch AI Planner
+          <span data-i18n="home.cta">Launch AI Planner</span>
         </button>
       </div>
     </div>
@@ -79,19 +82,19 @@
         <div class="feature-icon">
           <span class="material-icons">auto_awesome</span>
         </div>
-        <p class="section-tag">AI Itinerary Planner</p>
-        <h2 class="phase-heading">Travel planning,<br>reimagined.</h2>
-        <p class="phase-body">
+        <p class="section-tag" data-i18n="home.featureTag">AI Itinerary Planner</p>
+        <h2 class="phase-heading" data-i18n-html="home.featureTitle">Travel planning,<br>reimagined.</h2>
+        <p class="phase-body" data-i18n="home.featureBody">
           Day-by-day journeys built around your exact budget, pace, and passions —
           from sunrise tea ceremonies to rooftop jazz bars.
         </p>
         <div class="phase-pills">
-          <span class="pill"><span class="material-icons" style="font-size:14px">place</span> Destination
-            smart-matching</span>
-          <span class="pill"><span class="material-icons" style="font-size:14px">schedule</span> Day-by-day
-            structure</span>
-          <span class="pill"><span class="material-icons" style="font-size:14px">restaurant</span> Dining
-            highlights</span>
+          <span class="pill"><span class="material-icons" style="font-size:14px">place</span> <span
+              data-i18n="home.pill1">Destination smart-matching</span></span>
+          <span class="pill"><span class="material-icons" style="font-size:14px">schedule</span> <span
+              data-i18n="home.pill2">Day-by-day structure</span></span>
+          <span class="pill"><span class="material-icons" style="font-size:14px">restaurant</span> <span
+              data-i18n="home.pill3">Dining highlights</span></span>
         </div>
       </div>
     </div>
@@ -99,13 +102,13 @@
     <!-- Phase 3 — CTA (scroll 68%–92%) -->
     <div class="phase-overlay" id="phase-3">
       <div class="phase-card phase-card--cta">
-        <h2 class="phase-heading">Ready to craft<br>your next adventure?</h2>
-        <p class="phase-body">
+        <h2 class="phase-heading" data-i18n-html="home.ctaTitle">Ready to craft<br>your next adventure?</h2>
+        <p class="phase-body" data-i18n="home.ctaBody">
           Let Sarathi's AI weave the perfect journey — one uniquely yours.
         </p>
         <button class="hero-cta" id="launchPlannerCta">
           <span class="material-icons">rocket_launch</span>
-          Get Started
+          <span data-i18n="home.ctaBtn">Get Started</span>
         </button>
       </div>
     </div>
@@ -119,13 +122,13 @@
 
   <!-- ── Footer (outside scroll zone) ──────────────────── -->
   <footer class="site-footer-fixed">
-    <div class="footer-brand">
+    <div class="footer-brand" data-i18n="footer.brand">
       Crafted by Sarathi — bespoke travel assistance with privacy by design.
     </div>
     <div class="footer-links">
-      <a href="/about">About us</a>
-      <a href="/privacy">Privacy policy</a>
-      <a href="/terms">Terms of service</a>
+      <a href="/about" data-i18n="footer.about">About us</a>
+      <a href="/privacy" data-i18n="footer.privacy">Privacy policy</a>
+      <a href="/terms" data-i18n="footer.terms">Terms of service</a>
     </div>
   </footer>
 
@@ -134,6 +137,7 @@
     <img class="sarathi-launch-logo" id="launchLogo" src="/sarathi_logo_transparent.png" alt="Sarathi" />
   </div>
 
+  <script src="/js/i18n.js"></script>
   <script src="/js/scroll-canvas.js"></script>
   <script src="/js/home.js"></script>
 </body>

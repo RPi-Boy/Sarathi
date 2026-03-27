@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sarathi · Travel Journal</title>
+    <meta name="description"
+        content="Relive your journeys — a curated timeline of your travel memories with Sarathi." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body class="journal-page">
+    <div class="page-transition"></div>
+
+    <!-- ── Floating Pill Navbar ─────────────────────────── -->
+    <nav class="floating-nav" id="mainNav">
+        <a class="nav-brand-group" href="/">
+            <img src="/sarathi_logo_transparent.png" alt="Sarathi logo" />
+            <span class="nav-brand-text">Sarathi</span>
+        </a>
+        <div class="nav-links">
+            <a class="nav-link" href="/" id="launchPlannerNav" data-i18n="nav.planner">Launch AI Planner</a>
+            <a class="nav-link" href="/plans" data-i18n="nav.plans">My Plans</a>
+            <a class="nav-link active" href="/journal" data-i18n="nav.journal">Journal</a>
+        </div>
+        <div class="nav-spacer"></div>
+        <button class="lang-toggle" id="langToggleBtn" title="Switch language">
+            <span class="lang-current">EN</span><span class="lang-divider">|</span><span class="lang-alt">हि</span>
+        </button>
+        <a class="nav-icon-btn" href="/login" id="navLoginBtn" data-i18n-title="nav.login">
+            <span class="material-icons">person</span>
+        </a>
+    </nav>
+
+    <!-- ── Page Content ─────────────────────────────────── -->
+    <div class="page-shell journal-shell">
+
+        <header class="journal-header">
+            <p class="section-tag"><span class="dot"></span> <span data-i18n="journal.tag">Memories & Reflections</span>
+            </p>
+            <h1 class="journal-title" data-i18n="journal.title">Travel Journal</h1>
+            <p class="journal-subtitle" data-i18n="journal.subtitle">
+                Every destination leaves a story. Here are yours.
+            </p>
+        </header>
+
+        <!-- Timeline -->
+        <div class="journal-timeline" id="journalTimeline">
+            <!-- Entries injected by journal.js -->
+        </div>
+
+    </div>
+
+    <!-- ── Footer ───────────────────────────────────────── -->
+    <footer class="site-footer-fixed" style="position: relative;">
+        <div class="footer-brand" data-i18n="footer.brand">
+            Crafted by Sarathi — bespoke travel assistance with privacy by design.
+        </div>
+        <div class="footer-links">
+            <a href="/about" data-i18n="footer.about">About us</a>
+            <a href="/privacy" data-i18n="footer.privacy">Privacy policy</a>
+            <a href="/terms" data-i18n="footer.terms">Terms of service</a>
+        </div>
+    </footer>
+
+    <script src="/js/i18n.js"></script>
+    <script src="/js/journal.js"></script>
+</body>
+
+</html>

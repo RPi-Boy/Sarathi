@@ -35,7 +35,7 @@
   --radius-pill: 999px;
 
   /* Typography */
-  font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Space Grotesk", "Noto Sans Devanagari", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ── Reset ─────────────────────────────────────────────────────── */
@@ -56,7 +56,7 @@ body {
   min-height: 100vh;
   background: var(--bg-deep);
   color: var(--text-primary);
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: "Space Grotesk", "Noto Sans Devanagari", system-ui, sans-serif;
   line-height: 1.6;
   overflow-x: hidden;
   position: relative;
@@ -1583,4 +1583,610 @@ body.modal-open {
 /* Hide homepage-only body classes when not on homepage */
 body.home-page {
   overflow-x: hidden;
+}
+
+/* ================================================================
+   MY PLANS PAGE
+   ================================================================ */
+
+.plans-page {
+  background: linear-gradient(135deg, var(--bg-deep), #0a0f1f 45%, var(--bg-deep));
+}
+
+.plans-shell {
+  padding-top: 100px;
+}
+
+.plans-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.plans-title {
+  font-family: "Cinzel", serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 600;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.plans-subtitle {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ── Stats Row ──────────────────────────────────────── */
+
+.plans-stats {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.stat-pill:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.stat-pill .material-icons {
+  font-size: 18px;
+  color: var(--accent);
+}
+
+/* ── Plans Grid ─────────────────────────────────────── */
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+/* ── Plan Card ──────────────────────────────────────── */
+
+.plan-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  animation: planCardIn 0.6s ease both;
+}
+
+.plan-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--accent-dim);
+  border-color: rgba(131, 255, 209, 0.15);
+}
+
+@keyframes planCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plan-card-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+.plan-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.plan-card:hover .plan-card-image img {
+  transform: scale(1.06);
+}
+
+.plan-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+}
+
+.plan-card-placeholder .material-icons {
+  font-size: 48px;
+  color: var(--text-subtle);
+}
+
+/* ── Status Badge ───────────────────────────────────── */
+
+.plan-status-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.plan-status-badge .material-icons {
+  font-size: 14px;
+}
+
+.status--active {
+  background: rgba(131, 255, 209, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(131, 255, 209, 0.25);
+}
+
+.status--completed {
+  background: rgba(253, 227, 200, 0.15);
+  color: var(--accent-warm);
+  border: 1px solid rgba(253, 227, 200, 0.25);
+}
+
+.status--draft {
+  background: rgba(240, 242, 255, 0.08);
+  color: var(--text-muted);
+  border: 1px solid rgba(240, 242, 255, 0.12);
+}
+
+/* ── Card Body ──────────────────────────────────────── */
+
+.plan-card-body {
+  padding: 20px 22px 22px;
+}
+
+.plan-card-dest {
+  font-family: "Cinzel", serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.plan-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.plan-card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.plan-card-meta .material-icons {
+  font-size: 16px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+.plan-card-highlights {
+  font-size: 0.88rem;
+  color: var(--text-subtle);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.plan-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plan-card-budget {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.plan-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-dim);
+  border: 1px solid rgba(131, 255, 209, 0.2);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.plan-card-btn:hover {
+  background: rgba(131, 255, 209, 0.25);
+  transform: translateX(3px);
+}
+
+.plan-card-btn .material-icons {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.plan-card-btn:hover .material-icons {
+  transform: translateX(3px);
+}
+
+/* ================================================================
+   TRAVEL JOURNAL PAGE
+   ================================================================ */
+
+.journal-page {
+  background: linear-gradient(135deg, var(--bg-deep), #0a0f1f 45%, var(--bg-deep));
+}
+
+.journal-shell {
+  padding-top: 100px;
+}
+
+.journal-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.journal-title {
+  font-family: "Cinzel", serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 600;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-warm));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.journal-subtitle {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Timeline ───────────────────────────────────────── */
+
+.journal-timeline {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.journal-timeline::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--glass-border) 10%, var(--glass-border) 90%, transparent);
+  transform: translateX(-50%);
+}
+
+/* ── Journal Entry ──────────────────────────────────── */
+
+.journal-entry {
+  position: relative;
+  display: flex;
+  margin-bottom: 56px;
+  animation: journalFadeIn 0.7s ease both;
+}
+
+@keyframes journalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.journal-entry--left {
+  justify-content: flex-start;
+  padding-right: calc(50% + 30px);
+}
+
+.journal-entry--right {
+  justify-content: flex-end;
+  padding-left: calc(50% + 30px);
+}
+
+.journal-entry-dot {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateX(-50%);
+  z-index: 2;
+  box-shadow: 0 0 12px rgba(131, 255, 209, 0.3);
+}
+
+.journal-entry-card {
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-lg) !important;
+  padding: 0 !important;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.journal-entry-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Journal Hero Image ─────────────────────────────── */
+
+.journal-hero {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+.journal-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.journal-entry-card:hover .journal-hero img {
+  transform: scale(1.05);
+}
+
+.journal-hero-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.journal-hero-placeholder .material-icons {
+  font-size: 48px;
+  color: var(--text-subtle);
+}
+
+.journal-hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to top, rgba(8, 8, 13, 0.85), transparent);
+}
+
+.journal-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.journal-mood-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.journal-mood-tag .material-icons {
+  font-size: 14px;
+}
+
+/* ── Journal Entry Body ─────────────────────────────── */
+
+.journal-entry-body {
+  padding: 20px 22px 24px;
+}
+
+.journal-destination {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.journal-destination .material-icons {
+  font-size: 16px;
+}
+
+.journal-entry-title {
+  font-family: "Cinzel", serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.journal-entry-excerpt {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ── Skeleton Loaders ───────────────────────────────── */
+
+.skeleton-shimmer {
+  background: linear-gradient(110deg, var(--bg-elevated) 30%, rgba(255, 255, 255, 0.04) 50%, var(--bg-elevated) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-line {
+  border-radius: 6px;
+}
+
+.plan-card--skeleton .plan-card-image {
+  height: 200px;
+}
+
+/* ── Responsive: Plans & Journal ────────────────────── */
+
+@media (max-width: 768px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plans-stats {
+    gap: 10px;
+  }
+
+  .stat-pill {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+
+  .journal-timeline::before {
+    left: 20px;
+  }
+
+  .journal-entry--left,
+  .journal-entry--right {
+    padding-left: 50px;
+    padding-right: 0;
+    justify-content: flex-start;
+  }
+
+  .journal-entry-dot {
+    left: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .plans-shell,
+  .journal-shell {
+    padding-top: 80px;
+  }
+
+  .plan-card-image {
+    height: 160px;
+  }
+
+  .journal-hero {
+    height: 170px;
+  }
+
+  .journal-entry {
+    margin-bottom: 36px;
+  }
+}
+
+/* ================================================================
+   LANGUAGE TOGGLE
+   ================================================================ */
+
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  cursor: pointer;
+  font-family: "Space Grotesk", "Noto Sans Devanagari", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+  margin-right: 8px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.lang-toggle:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: rgba(131, 255, 209, 0.06);
+}
+
+.lang-current {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.lang-divider {
+  margin: 0 6px;
+  color: var(--glass-border);
+  opacity: 0.5;
+}
+
+.lang-alt {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.lang-toggle:hover .lang-alt {
+  opacity: 1;
 }

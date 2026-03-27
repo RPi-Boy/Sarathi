@@ -288,6 +288,36 @@ app.get('/terms', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'terms.html'));
 });
 
+app.get('/plans', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'plans.html'));
+});
+
+app.get('/journal', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'journal.html'));
+});
+
+/**
+ * Proxy endpoint for client-side Unsplash image fetching.
+ * Keeps the API key server-side.
+ */
+app.get('/api/unsplash', async (req, res) => {
+  const query = (req.query.q || '').trim();
+  if (!query) {
+    return res.status(400).json({ error: 'Query parameter "q" is required.' });
+  }
+  const apiKey = process.env.UNSPLASH_ACCESS_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Unsplash API key not configured.' });
+  }
+  try {
+    const photos = await fetchUnsplashPhotos(query, apiKey);
+    res.json({ photos });
+  } catch (err) {
+    console.error('Unsplash proxy error:', err.message);
+    res.status(502).json({ error: 'Failed to fetch images.' });
+  }
+});
+
 app.get('/api/session', (req, res) => {
   res.json({
     authenticated: Boolean(req.session.user),
