@@ -272,11 +272,8 @@ app.get('/signup', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
-app.get('/answer', (req, res) => {
-  if (!req.session.preferences) {
-    return res.redirect('/');
-  }
-  return res.sendFile(path.join(__dirname, 'public', 'answer.html'));
+app.get('/answer', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'answer.html'));
 });
 
 app.get('/about', (_req, res) => {

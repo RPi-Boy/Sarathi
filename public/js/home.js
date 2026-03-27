@@ -1,72 +1,58 @@
-const form = document.getElementById('preferenceForm');
-const statusEl = document.getElementById('formStatus');
-const mapBackdrop = document.getElementById('mapBackdrop');
-let cursorAnimationFrame;
-let cursorTarget = { x: 50, y: 50 };
-let currentCursor = { x: 50, y: 50 };
+/**
+ * Sarathi — Homepage JavaScript
+ * Handles:
+ *  1. "Launch AI Planner" click → Sarathi logo animation → navigate to /answer
+ *  2. Session-aware login icon state
+ *
+ * Note: particle canvas removed — replaced by scroll-driven frame canvas in scroll-canvas.js
+ */
 
-const setStatus = (text, isError = false) => {
-  if (!statusEl) return;
-  statusEl.textContent = text;
-  statusEl.style.color = isError ? '#ff9bbd' : 'var(--muted)';
-};
+'use strict';
 
-const handleTransition = () => {
-  document.body.classList.add('transitioning');
-  setTimeout(() => {
+/* ── Launch Animation ────────────────────────────────────────────── */
+
+const overlay = document.getElementById('launchOverlay');
+
+/**
+ * Play the Sarathi launch animation sequence, then navigate to /answer.
+ */
+const triggerLaunchAnimation = () => {
+  if (!overlay) {
     window.location.href = '/answer';
-  }, 500);
+    return;
+  }
+  overlay.classList.add('active');
+
+  // swoop (0.8s) + spin-zoom (1.2s) = ~2s total, then fade + navigate
+  setTimeout(() => {
+    document.body.classList.add('transitioning');
+    setTimeout(() => { window.location.href = '/answer'; }, 400);
+  }, 1800);
 };
 
-if (form) {
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    setStatus('Configuring your journey...');
+// Bind all "Launch AI Planner" triggers
+['launchPlannerNav', 'launchPlannerHero', 'launchPlannerCta'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', (e) => { e.preventDefault(); triggerLaunchAnimation(); });
+});
 
-    const formData = new FormData(form);
-    const preferences = Object.fromEntries(formData.entries());
+/* ── Session-Aware Login Icon ────────────────────────────────────── */
 
-    try {
-      const response = await fetch('/api/preferences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(preferences),
-      });
+const navLoginBtn = document.getElementById('navLoginBtn');
 
-      if (!response.ok) {
-        throw new Error('Unable to save preferences.');
-      }
-
-      setStatus('Perfect. Curating scenes...');
-      handleTransition();
-    } catch (error) {
-      console.error(error);
-      setStatus('We hit light turbulence. Try again?', true);
+/**
+ * Check session and update the login button icon if user is authenticated.
+ */
+const updateNavSession = async () => {
+  try {
+    const res = await fetch('/api/session');
+    const data = await res.json();
+    if (data?.authenticated && navLoginBtn) {
+      navLoginBtn.title = data.user?.firstName || 'Account';
+      const icon = navLoginBtn.querySelector('.material-icons');
+      if (icon) icon.textContent = 'account_circle';
     }
-  });
-}
-
-const updateMapBackdrop = () => {
-  if (!mapBackdrop) return;
-  currentCursor.x += (cursorTarget.x - currentCursor.x) * 0.08;
-  currentCursor.y += (cursorTarget.y - currentCursor.y) * 0.08;
-  mapBackdrop.style.setProperty('--cursor-x', `${currentCursor.x}%`);
-  mapBackdrop.style.setProperty('--cursor-y', `${currentCursor.y}%`);
-  cursorAnimationFrame = requestAnimationFrame(updateMapBackdrop);
+  } catch (_) { /* fail silently */ }
 };
 
-if (mapBackdrop) {
-  window.addEventListener('pointermove', (event) => {
-    const { innerWidth, innerHeight } = window;
-    cursorTarget = {
-      x: Math.max(0, Math.min(100, (event.clientX / innerWidth) * 100)),
-      y: Math.max(0, Math.min(100, (event.clientY / innerHeight) * 100)),
-    };
-  });
-
-  window.addEventListener('pointerleave', () => {
-    cursorTarget = { x: 50, y: 50 };
-  });
-
-  cursorAnimationFrame = requestAnimationFrame(updateMapBackdrop);
-}
+updateNavSession();

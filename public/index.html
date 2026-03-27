@@ -1,113 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sarathi · Bespoke Travel Assistant</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/css/styles.css" />
-  </head>
-  <body class="home-page">
-    <div class="page-transition"></div>
-    <div id="mapBackdrop" class="map-backdrop" aria-hidden="true"></div>
-    <div class="floating-orb orb-primary"></div>
-    <div class="floating-orb orb-secondary"></div>
 
-    <div class="page-shell">
-      <nav class="nav-bar">
-        <div class="nav-left">
-          <img src="sarathi_logo_transparent.png" height=110 width=100">
-          <a class="nav-brand" href="/" style="text-decoration: none;">SARATHI</a>
-        </div>
-        <div class="nav-right">
-          <a class="nav-login" href="/login">Login</a>
-        </div>
-      </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sarathi · Bespoke Travel Assistant</title>
+  <meta name="description"
+    content="Sarathi — an AI-powered travel concierge that crafts bespoke itineraries tailored to your tastes, budget, and curiosity." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
 
-      <section class="hero-grid">
-        <div class="hero-copy">
-          <p class="tagline">Craft the journey before it happens</p>
-          <h1>
-            A travel assistant that listens,<br />
-            then paints the<br />
-            <span>perfect itinerary.</span>
-          </h1>
-          <p>
-            Feed Sarathi with your constraints, tastes, and curiosities. Watch it weave
-            Michelin-grade dining, soulful detours, and pragmatic logistics into a single
-            itinerary you can trust.
-          </p>
-        </div>
+<body class="home-page">
+  <div class="page-transition"></div>
 
-        <div class="glass-card">
-          <h2 style="margin-bottom: 18px">Plan a new escape</h2>
-          <form id="preferenceForm" class="form-grid">
-            <label>
-              Destination / Region
-              <input type="text" name="destination" placeholder="Kyoto, Amalfi, Patagonia..." required />
-            </label>
-            <label>
-              Dates / Timeframe
-              <input type="text" name="dates" placeholder="May 18 – 25, 2026" required />
-            </label>
-            <label>
-              Budget
-              <input type="text" name="budget" placeholder="$4k total" />
-            </label>
-            <label>
-              Travelers
-              <input type="number" min="1" name="passengers" placeholder="2" />
-            </label>
-            <label>
-              Interests
-              <input type="text" name="interests" placeholder="Architecture, cafes, artisan crafts" />
-            </label>
-            <label>
-              Preferred Weather
-              <select name="weather">
-                <option value="Warm and sunny">Warm & sunny</option>
-                <option value="Mild spring">Mild spring</option>
-                <option value="Crisp autumn">Crisp autumn</option>
-                <option value="Cozy winter">Cozy winter</option>
-              </select>
-            </label>
-            <label>
-              Travel Pace
-              <select name="pace">
-                <option value="Leisurely">Leisurely</option>
-                <option value="Balanced" selected>Balanced</option>
-                <option value="Fast-paced">Fast paced</option>
-              </select>
-            </label>
-            <label class="full-width">
-              Specific notes / must-dos
-              <textarea name="specialNotes" placeholder="Need a sunrise tea ceremony, avoid seafood, etc."></textarea>
-            </label>
-            <div class="full-width">
-              <button class="btn" type="submit">Summon Sarathi</button>
-              <p class="status-badge" id="formStatus"></p>
-            </div>
-          </form>
-        </div>
-      </section>
+  <!-- ── Loader ─────────────────────────────────────────── -->
+  <div id="loader" aria-live="polite" aria-label="Loading experience">
+    <div class="loader-logo-wrap">
+      <img src="/sarathi_logo_transparent.png" alt="Sarathi" class="loader-logo" />
+      <span class="loader-brand">SARATHI</span>
+    </div>
+    <p class="loader-label">Curating your experience…</p>
+    <div class="loader-track">
+      <div id="loader-bar" class="loader-bar"></div>
+    </div>
+  </div>
 
-      <footer class="site-footer">
-        <div class="footer-brand">
-          Crafted by Sarathi — bespoke travel assistance with privacy by design.
+  <!-- ── Frame Canvas (fixed background) ───────────────── -->
+  <canvas id="frame-canvas" aria-hidden="true"></canvas>
+
+  <!-- ── Floating Pill Navbar (always visible) ─────────── -->
+  <nav class="floating-nav" id="mainNav">
+    <a class="nav-brand-group" href="/">
+      <img src="/sarathi_logo_transparent.png" alt="Sarathi logo" />
+      <span class="nav-brand-text">Sarathi</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link active" href="#" id="launchPlannerNav">Launch AI Planner</a>
+      <a class="nav-link" href="#" onclick="alert('My Plans — coming soon!'); return false;">My Plans</a>
+      <a class="nav-link" href="#" onclick="alert('Journal — coming soon!'); return false;">Journal</a>
+    </div>
+    <div class="nav-spacer"></div>
+    <a class="nav-icon-btn" href="/login" id="navLoginBtn" title="Login">
+      <span class="material-icons">person</span>
+    </a>
+  </nav>
+
+  <!-- ── Tall Scroll Container ──────────────────────────── -->
+  <div id="scroll-container">
+
+    <!-- Phase 1 — Hero (scroll 5%–32%) -->
+    <div class="phase-overlay" id="phase-1">
+      <div class="phase-card">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          AI-powered travel planning
         </div>
-        <div class="footer-links">
-          <a href="/about">About us</a>
-          <a href="/privacy">Privacy policy</a>
-          <a href="/terms">Terms of service</a>
-        </div>
-      </footer>
+        <h1 class="hero-title">Your journey,<br>imagined before<br>it begins.</h1>
+        <p class="hero-subtitle">
+          Feed Sarathi your constraints, tastes, and curiosities. Watch it weave Michelin-grade
+          dining, soulful detours, and pragmatic logistics into a single itinerary you can trust.
+        </p>
+        <button class="hero-cta" id="launchPlannerHero">
+          <span class="material-icons">explore</span>
+          Launch AI Planner
+        </button>
+      </div>
     </div>
 
-    <script src="/js/home.js" type="module"></script>
-  </body>
+    <!-- Phase 2 — Feature Highlight (scroll 38%–62%) -->
+    <div class="phase-overlay" id="phase-2">
+      <div class="phase-card phase-card--feature">
+        <div class="feature-icon">
+          <span class="material-icons">auto_awesome</span>
+        </div>
+        <p class="section-tag">AI Itinerary Planner</p>
+        <h2 class="phase-heading">Travel planning,<br>reimagined.</h2>
+        <p class="phase-body">
+          Day-by-day journeys built around your exact budget, pace, and passions —
+          from sunrise tea ceremonies to rooftop jazz bars.
+        </p>
+        <div class="phase-pills">
+          <span class="pill"><span class="material-icons" style="font-size:14px">place</span> Destination
+            smart-matching</span>
+          <span class="pill"><span class="material-icons" style="font-size:14px">schedule</span> Day-by-day
+            structure</span>
+          <span class="pill"><span class="material-icons" style="font-size:14px">restaurant</span> Dining
+            highlights</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 — CTA (scroll 68%–92%) -->
+    <div class="phase-overlay" id="phase-3">
+      <div class="phase-card phase-card--cta">
+        <h2 class="phase-heading">Ready to craft<br>your next adventure?</h2>
+        <p class="phase-body">
+          Let Sarathi's AI weave the perfect journey — one uniquely yours.
+        </p>
+        <button class="hero-cta" id="launchPlannerCta">
+          <span class="material-icons">rocket_launch</span>
+          Get Started
+        </button>
+      </div>
+    </div>
+
+    <!-- Scroll indicator (bottom of scroll zone) -->
+    <div class="scroll-indicator" aria-hidden="true">
+      <span class="material-icons">expand_more</span>
+    </div>
+
+  </div><!-- #scroll-container -->
+
+  <!-- ── Footer (outside scroll zone) ──────────────────── -->
+  <footer class="site-footer-fixed">
+    <div class="footer-brand">
+      Crafted by Sarathi — bespoke travel assistance with privacy by design.
+    </div>
+    <div class="footer-links">
+      <a href="/about">About us</a>
+      <a href="/privacy">Privacy policy</a>
+      <a href="/terms">Terms of service</a>
+    </div>
+  </footer>
+
+  <!-- ── Sarathi Launch Overlay ─────────────────────────── -->
+  <div class="sarathi-launch-overlay" id="launchOverlay">
+    <img class="sarathi-launch-logo" id="launchLogo" src="/sarathi_logo_transparent.png" alt="Sarathi" />
+  </div>
+
+  <script src="/js/scroll-canvas.js"></script>
+  <script src="/js/home.js"></script>
+</body>
+
 </html>
