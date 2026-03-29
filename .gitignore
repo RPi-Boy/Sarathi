@@ -5,3 +5,5 @@ logs/
 dist/
 .DS_Store
 npm-debug.log*
+git-hosts
+git-hosts.pub
