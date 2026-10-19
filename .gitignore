@@ -8,3 +8,5 @@ npm-debug.log*
 git-hosts
 git-hosts.pub
 git/
+data/*.db
+data/*.db-*

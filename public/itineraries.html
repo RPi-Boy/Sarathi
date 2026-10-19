@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sarathi · My Trips</title>
+  <meta name="description" content="Your Sarathi trips with their booked flights, trains and hotels." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body class="answer-page">
+  <nav class="floating-nav" id="mainNav">
+    <a class="nav-brand-group" href="/">
+      <img src="/sarathi_logo_transparent.png" alt="Sarathi logo" />
+      <span class="nav-brand-text">Sarathi</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="/answer" data-i18n="nav.planner">Launch AI Planner</a>
+      <span class="nav-link active" data-i18n="nav.itineraries">My Trips</span>
+      <a class="nav-link" href="/plans" data-i18n="nav.plans">My Plans</a>
+      <a class="nav-link" href="/journal" data-i18n="nav.journal">Journal</a>
+    </div>
+    <div class="nav-spacer"></div>
+    <button class="lang-toggle" id="langToggleBtn" title="Switch language">
+      <span class="lang-current">EN</span><span class="lang-divider">|</span><span class="lang-alt">हि</span>
+    </button>
+    <button id="logoutBtn" class="nav-icon-btn" title="Logout">
+      <span class="material-icons">logout</span>
+    </button>
+  </nav>
+
+  <div class="page-shell">
+    <header class="trips-header">
+      <p class="tagline" data-i18n="itineraries.tag">Your journeys</p>
+      <h2 data-i18n="itineraries.title">My Trips</h2>
+    </header>
+    <div id="tripsOutput" class="trips-output">
+      <p class="muted" data-i18n="itineraries.loading">Loading your trips…</p>
+    </div>
+  </div>
+
+  <script src="/js/i18n.js"></script>
+  <script src="/js/markdown.js"></script>
+  <script src="/js/itineraries.js"></script>
+</body>
+
+</html>
