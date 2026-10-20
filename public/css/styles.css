@@ -830,13 +830,15 @@ body.answer-page {
   align-items: stretch;
 }
 
+/* height:0 + min-height:100% lets the card fill the row set by the form column
+   without its own content stretching the row; the content area scrolls instead. */
 .itinerary-card {
-  min-height: clamp(520px, 60vh, 680px);
+  min-height: max(100%, 520px);
+  height: 0;
   padding: 32px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  height: 100%;
 }
 
 .itinerary-card h2 {
@@ -845,8 +847,8 @@ body.answer-page {
 }
 
 .itinerary-content {
-  flex: 1;
-  max-height: clamp(320px, 50vh, 420px);
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
   padding-right: 8px;
   color: var(--text-primary);
@@ -1253,6 +1255,17 @@ body.modal-open {
 @media (max-width: 960px) {
   .answer-layout {
     grid-template-columns: 1fr;
+  }
+
+  .itinerary-card {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .itinerary-content {
+    flex: none;
+    max-height: 70vh;
   }
 
   .media-carousel-wrapper {
@@ -2190,3 +2203,84 @@ body.home-page {
 .lang-toggle:hover .lang-alt {
   opacity: 1;
 }
+/* ── Recommendations ─────────────────────────────────────────────── */
+.recs-section { margin-top: 2rem; }
+.recs-card { padding: 1.5rem; }
+.rec-group { margin-top: 1.25rem; }
+.rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; margin-top: 0.75rem; }
+.rec-card {
+  display: flex; flex-direction: column; gap: 0.35rem; padding: 1rem;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+}
+.rec-title { margin: 0; color: var(--text-primary); }
+.rec-line { margin: 0; font-size: 0.85rem; }
+.rec-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 0.5rem; }
+.rec-price { color: var(--accent); }
+.rec-save { margin-left: auto; padding: 0.25rem 0.75rem; }
+
+/* ── Details modal & trips page ──────────────────────────────────── */
+.rec-card { cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+.rec-card:hover, .rec-card:focus-visible { border-color: var(--accent); transform: translateY(-2px); outline: none; }
+.rec-more { margin-left: auto; color: var(--accent); font-size: 0.85rem; }
+.detail-panel { max-width: 560px; }
+.detail-title { margin: 0 0 1rem; }
+.detail-row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem; }
+.detail-row > span:last-child { text-align: right; }
+.detail-stops { margin: 0.75rem 0; }
+.detail-stops summary { cursor: pointer; color: var(--accent); }
+.detail-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+.detail-field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; }
+.detail-total { display: flex; justify-content: space-between; align-items: baseline; margin: 0.75rem 0 1rem; font-size: 1.1rem; }
+.detail-error { color: #ff9bbd; margin: 0.5rem 0; min-height: 1em; }
+.trips-header { margin: 6rem 0 1.5rem; }
+.trips-output { display: grid; gap: 1.5rem; }
+.trip-card { padding: 1.5rem; }
+.trip-head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+.trip-head h3, .trip-head p { margin: 0; }
+.trip-total { display: flex; flex-direction: column; align-items: flex-end; }
+.trip-plan { margin-top: 1rem; }
+.trip-plan summary { cursor: pointer; color: var(--accent); }
+.trip-plan-text { white-space: pre-wrap; font-family: inherit; color: var(--text-muted); }
+.booking { cursor: default; }
+.booking:hover { transform: none; border-color: var(--glass-border); }
+.booking.cancelled { opacity: 0.55; }
+.booking-head { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--accent); }
+.booking-status { color: #ff9bbd; }
+
+/* ── Trip list / timeline ────────────────────────────────────────── */
+.trip-summary { cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+.trip-summary:hover, .trip-summary:focus-visible { border-color: var(--accent); transform: translateY(-2px); outline: none; }
+.trip-back { display: inline-block; margin: 6rem 0 1rem; color: var(--accent); text-decoration: none; }
+.timeline { margin: 0.5rem 0 1.5rem; }
+.timeline-day { margin: 1.25rem 0 0.5rem; color: var(--accent-warm); }
+.timeline-item { position: relative; margin-left: 4.9rem; padding: 0.5rem 0 0.5rem 1.5rem; border-left: 2px solid var(--glass-border); }
+.timeline-time { position: absolute; left: -4.9rem; width: 3.6rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.timeline-dot { position: absolute; left: -15px; top: 0.4rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg-elevated); font-size: 0.9rem; }
+.timeline-body p { margin: 0.15rem 0 0; font-size: 0.85rem; }
+.kind-arrival .timeline-body strong, .kind-check_in .timeline-body strong { color: var(--accent); }
+
+/* ── Rendered Markdown (AI text) ─────────────────────────────────── */
+.md { display: flex; flex-direction: column; gap: 10px; color: rgba(240, 242, 255, 0.82); line-height: 1.65; }
+.md p { margin: 0; }
+.md strong { color: var(--text-primary); }
+.md em { color: var(--accent-warm); }
+.md code { background: var(--glass-bg); padding: 1px 6px; border-radius: 6px; }
+.md hr { border: 0; border-top: 1px solid var(--glass-border); margin: 6px 0; }
+.md-h1, .md-h2 { font-family: "Cinzel", serif; font-size: 1.25rem; color: var(--accent); margin: 14px 0 0; }
+.md-h3, .md-h4 { font-size: 1.02rem; color: var(--accent-warm); margin: 10px 0 0; }
+.md-list { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px; }
+.md-list li::marker { color: var(--accent-warm); }
+
+/* ── Journey plan ────────────────────────────────────────────────── */
+.journey { display: flex; flex-direction: column; gap: 0.75rem; }
+.journey-leg { padding: 1rem 1rem 1rem 1.25rem; border: 1px solid var(--glass-border); border-left: 3px solid var(--accent); border-radius: var(--radius-md); background: var(--glass-bg); }
+.journey-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+.journey-icon { font-size: 1.2rem; }
+.journey-when { margin: 0 0 0.25rem; color: var(--accent-warm); font-variant-numeric: tabular-nums; }
+.journey-body p { margin: 0.15rem 0; }
+.journey-issue { font-size: 0.82rem; margin: 0.25rem 0 0; }
+.journey-more { margin-top: 0.5rem; font-size: 0.88rem; }
+.journey-more summary { cursor: pointer; color: var(--accent); }
+.journey-option { display: block; padding: 0.3rem 0; cursor: pointer; }
+.journey-foot { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.1rem; padding: 0.5rem 0; }
+.md-code { margin: 0; padding: 10px 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); white-space: pre-wrap; font-size: 0.9rem; color: var(--accent-warm); }

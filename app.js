@@ -1,7 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
-const fsPromises = require('fs/promises');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const fetch = require('node-fetch');
@@ -9,106 +7,20 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+const database = require('./db');
+const { extractFilters, generateItinerary } = require('./services/llm');
+const { recommend, cityNames } = require('./services/recommend');
+const bookings = require('./services/bookings');
+const { proposeJourney, planJourney, summarizeJourney } = require('./services/journey');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-const USERS_DB_PATH = path.join(__dirname, 'data', 'users.json');
 const SESSION_SECRET = process.env.SARATHI_SESSION_SECRET || 'sarathi-secret';
 
-const ensureUsersStore = async () => {
-  try {
-    await fsPromises.access(USERS_DB_PATH);
-  } catch (error) {
-    await fsPromises.mkdir(path.dirname(USERS_DB_PATH), { recursive: true });
-    await fsPromises.writeFile(
-      USERS_DB_PATH,
-      JSON.stringify({ users: [] }, null, 2),
-      'utf-8',
-    );
-  }
-};
+const db = database.init();
+const users = database.userRepo(db);
 
-const readUsers = async () => {
-  await ensureUsersStore();
-  const fileBuffer = await fsPromises.readFile(USERS_DB_PATH, 'utf-8');
-  return JSON.parse(fileBuffer || '{"users": []}');
-};
-
-const writeUsers = async (payload) => {
-  await fsPromises.writeFile(USERS_DB_PATH, JSON.stringify(payload, null, 2), 'utf-8');
-};
-
-const buildPromptFromPreferences = (prefs = {}) => {
-  const {
-    destination = 'a memorable location',
-    dates = 'flexible upcoming dates',
-    budget = 'a comfortable but not extravagant budget',
-    passengers = 'two travelers',
-    interests = 'culture, food, and hidden gems',
-    weather = 'pleasant weather',
-    pace = 'balanced pacing',
-    specialNotes = 'no specific constraints',
-  } = prefs;
-
-  return `You are Sarathi, an empathetic and detail-obsessed travel concierge. Draft a rich day-by-day itinerary.
-
-Destination or region: ${destination}
-Travel dates or timeframe: ${dates}
-Budget guidance: ${budget}
-Group size: ${passengers}
-Interests & must-do themes: ${interests}
-Preferred climate or weather: ${weather}
-Desired pace/style: ${pace}
-Extra notes / user constraints: ${specialNotes}
-
-Deliver:
-- A poetic intro paragraph setting the mood.
-- Daily sections with morning, afternoon, and night suggestions.
-- A dining highlight and a mindful/local tip each day.
-- Close with a short checklist and packing tip list.
-Keep it conversational yet authoritative.`;
-};
-
-const callOpenRouter = async (preferences) => {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error('Missing OPENROUTER_API_KEY in .env');
-  }
-
-  const model = process.env.GEMINI_MODEL || 'openai/gpt-5-mini';
-  const referer = process.env.OPENROUTER_REFERRER || 'http://localhost:3000';
-  const prompt = buildPromptFromPreferences(preferences);
-
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-      'HTTP-Referer': referer,
-      'X-Title': 'Sarathi',
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are Sarathi, a refined travel-planning co-pilot. Craft itineraries that feel bespoke, grounded in reality, and culturally respectful.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.7,
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`OpenRouter error: ${response.status} ${errText}`);
-  }
-
-  const data = await response.json();
-  const itinerary = data?.choices?.[0]?.message?.content || 'No itinerary returned.';
-  return itinerary;
-};
+const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
 
 const PLACEHOLDER_IMAGES = [
   {
@@ -292,6 +204,10 @@ app.get('/plans', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'plans.html'));
 });
 
+app.get('/itineraries', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'itineraries.html'));
+});
+
 app.get('/journal', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'journal.html'));
 });
@@ -331,6 +247,7 @@ app.post('/api/preferences', (req, res) => {
     destination: prefs.destination || '',
     dates: prefs.dates || '',
     budget: prefs.budget || '',
+    origin: prefs.origin || '',
     passengers: prefs.passengers || '',
     interests: prefs.interests || '',
     weather: prefs.weather || '',
@@ -365,28 +282,25 @@ app.get('/api/destination-media', async (req, res) => {
 
 app.post('/api/signup', async (req, res) => {
   try {
-    const { email, firstName, lastName, password } = req.body;
+    const { firstName, lastName, password } = req.body;
+    const email = normalizeEmail(req.body.email);
     if (!email || !firstName || !lastName || !password) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
-
-    const db = await readUsers();
-    const existingUser = db.users.find((user) => user.email === email);
-    if (existingUser) {
+    if (users.findByEmail(email)) {
       return res.status(400).json({ error: 'An account with this email already exists.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    db.users.push({
-      email,
-      firstName,
-      lastName,
-      password: hashedPassword,
-      createdAt: new Date().toISOString(),
-    });
-    await writeUsers(db);
+    const passwordHash = await bcrypt.hash(password, 10);
+    let id;
+    try {
+      id = users.create({ email, firstName, lastName, passwordHash });
+    } catch (err) {
+      // lost a race with a concurrent signup for the same email (UNIQUE constraint)
+      return res.status(400).json({ error: 'An account with this email already exists.' });
+    }
 
-    req.session.user = { email, firstName, lastName };
+    req.session.user = { id, email, firstName, lastName };
     res.json({ success: true, user: req.session.user });
   } catch (error) {
     res.status(500).json({ error: 'Failed to sign up.', details: error.message });
@@ -395,23 +309,24 @@ app.post('/api/signup', async (req, res) => {
 
 app.post('/api/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = normalizeEmail(req.body.email);
+    const { password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
-    const db = await readUsers();
-    const existingUser = db.users.find((user) => user.email === email);
+    const existingUser = users.findByEmail(email);
     if (!existingUser) {
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
 
-    const passwordMatch = await bcrypt.compare(password, existingUser.password);
+    const passwordMatch = await bcrypt.compare(password, existingUser.passwordHash);
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
 
     req.session.user = {
+      id: existingUser.id,
       email: existingUser.email,
       firstName: existingUser.firstName,
       lastName: existingUser.lastName,
@@ -428,6 +343,11 @@ app.post('/api/logout', (req, res) => {
   });
 });
 
+const requireLogin = (req, res, next) => {
+  if (!req.session.user) return res.status(401).json({ error: 'Please log in first.' });
+  return next();
+};
+
 app.post('/api/itinerary', requirePreferences, async (req, res) => {
   try {
     const preferences = {
@@ -435,7 +355,7 @@ app.post('/api/itinerary', requirePreferences, async (req, res) => {
       ...(req.body || {}),
     };
     req.session.preferences = preferences;
-    const itinerary = await callOpenRouter(preferences);
+    const itinerary = await generateItinerary(preferences, req.session.lastPicks || null);
     req.session.lastItinerary = itinerary;
     res.json({ itinerary });
   } catch (error) {
@@ -451,6 +371,113 @@ app.get('/api/itinerary/latest', (req, res) => {
     return res.status(404).json({ error: 'No itinerary generated yet.' });
   }
   return res.json({ itinerary: req.session.lastItinerary });
+});
+
+app.get('/api/cities', (_req, res) => {
+  res.json({ cities: cityNames(db) });
+});
+
+/**
+ * AI-filtered recommendations: the LLM turns the stored preferences into a filter JSON,
+ * the server validates it, and the database does the actual matching and ranking.
+ */
+app.post('/api/recommendations', requirePreferences, async (req, res) => {
+  try {
+    const preferences = { ...req.session.preferences, ...(req.body || {}) };
+    const { filters: proposed, source } = await extractFilters(preferences, {
+      cityNames: cityNames(db),
+    });
+    // Fields the user typed explicitly win over the model's reading of them.
+    if (preferences.origin) proposed.origin = preferences.origin;
+    if (preferences.destination) proposed.destination = preferences.destination;
+
+    const result = recommend(db, proposed);
+    const proposal = proposeJourney(db, result.filters);
+    const journey = proposal?.journey ? planJourney(db, result.filters, proposal.journey) : null;
+    if (journey && proposal) journey.notes.unshift(...proposal.notes);
+    if (!journey && proposal) result.notes.push(...proposal.notes);
+    if (journey) {
+      // The multi-leg plan supersedes "no flights/trains for A -> B" style notes of the direct search.
+      result.notes = result.notes.filter((n) => !/^No (direct )?(flight|train)/.test(n));
+    }
+    const counts = {
+      flights: result.flights.length,
+      trains: result.trains.length,
+      cabs: result.cabs.length,
+      hotels: result.hotels.length,
+      journey_legs: journey ? journey.legs.length : 0,
+    };
+    db.prepare(
+      'INSERT INTO searches (user_id, preferences, filters, filter_source, result_counts) VALUES (?, ?, ?, ?, ?)',
+    ).run(
+      req.session.user?.id ?? null,
+      JSON.stringify(preferences),
+      JSON.stringify(result.filters),
+      source,
+      JSON.stringify(counts),
+    );
+
+    req.session.lastPicks = journey
+      ? summarizeJourney(journey)
+      : { flights: result.flights.slice(0, 2), trains: result.trains.slice(0, 2), hotels: result.hotels.slice(0, 2) };
+    res.json({ ...result, journey, filter_source: source });
+  } catch (error) {
+    console.error('Recommendation error:', error);
+    res.status(500).json({ error: 'Unable to build recommendations.', details: error.message });
+  }
+});
+
+const handleBookingError = (res, err) => {
+  if (err instanceof bookings.BookingError) return res.status(err.status).json({ error: err.message });
+  console.error('Booking error:', err);
+  return res.status(500).json({ error: 'Something went wrong.' });
+};
+
+// Full record for the details modal (train stops, all amenities, ...).
+app.get('/api/details/:type/:ref', (req, res) => {
+  try {
+    const detail = bookings.getDetails(db, req.params.type, req.params.ref, req.query);
+    if (!detail) return res.status(404).json({ error: 'Not found.' });
+    return res.json(detail);
+  } catch (err) {
+    return handleBookingError(res, err);
+  }
+});
+
+app.post('/api/bookings', requireLogin, (req, res) => {
+  try {
+    const body = req.body || {};
+    const plan = req.session.lastItinerary && req.session.preferences?.destination
+      ? { destination: req.session.preferences.destination, text: req.session.lastItinerary }
+      : null;
+    return res.json({ success: true, ...bookings.createBooking(db, req.session.user.id, body, { plan }) });
+  } catch (err) {
+    return handleBookingError(res, err);
+  }
+});
+
+app.post('/api/bookings/batch', requireLogin, (req, res) => {
+  try {
+    const plan = req.session.lastItinerary && req.session.preferences?.destination
+      ? { destination: req.session.preferences.destination, text: req.session.lastItinerary }
+      : null;
+    return res.json({ success: true, ...bookings.createBookings(db, req.session.user.id, req.body || {}, { plan }) });
+  } catch (err) {
+    return handleBookingError(res, err);
+  }
+});
+
+app.delete('/api/bookings/:id', requireLogin, (req, res) => {
+  try {
+    return res.json({ success: bookings.cancelBooking(db, req.session.user.id, Number(req.params.id)) });
+  } catch (err) {
+    return handleBookingError(res, err);
+  }
+});
+
+app.get('/api/itineraries', requireLogin, (req, res) => {
+  if (req.query.summary) return res.json({ trips: bookings.tripSummaries(db, req.session.user.id) });
+  return res.json({ trips: bookings.listTrips(db, req.session.user.id) });
 });
 
 app.use((err, _req, res, _next) => {
