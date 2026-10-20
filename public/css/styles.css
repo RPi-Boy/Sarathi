@@ -2283,3 +2283,4 @@ body.home-page {
 .journey-more summary { cursor: pointer; color: var(--accent); }
 .journey-option { display: block; padding: 0.3rem 0; cursor: pointer; }
 .journey-foot { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.1rem; padding: 0.5rem 0; }
+.md-code { margin: 0; padding: 10px 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); white-space: pre-wrap; font-size: 0.9rem; color: var(--accent-warm); }

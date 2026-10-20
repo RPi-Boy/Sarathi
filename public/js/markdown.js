@@ -35,6 +35,7 @@
     const lines = String(text || '').replace(/\r/g, '').split('\n');
     let list = null;
     let para = null;
+    let fence = null; // lines of an open ``` block
 
     const flush = () => { list = null; para = null; };
     const addList = (tag, content) => {
@@ -52,6 +53,20 @@
     lines.forEach((raw) => {
       const line = raw.trim();
       let m;
+      if (line.startsWith('```')) {
+        if (fence) {
+          const pre = document.createElement('pre');
+          pre.className = 'md-code';
+          pre.textContent = fence.join('\n');
+          root.appendChild(pre);
+          fence = null;
+        } else {
+          flush();
+          fence = [];
+        }
+        return;
+      }
+      if (fence) { fence.push(raw); return; }
       if (!line) { flush(); return; }
       if ((m = line.match(/^(#{1,6})\s+(.*?)\s*#*$/))) {
         flush();
@@ -77,6 +92,12 @@
         appendInline(para, line);
       }
     });
+    if (fence && fence.length) {
+      const pre = document.createElement('pre');
+      pre.className = 'md-code';
+      pre.textContent = fence.join('\n');
+      root.appendChild(pre);
+    }
     return root;
   }
 

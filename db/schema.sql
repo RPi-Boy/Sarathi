@@ -189,3 +189,73 @@ CREATE TABLE IF NOT EXISTS itinerary_items (
   CHECK ((flight_number IS NOT NULL) + (train_number IS NOT NULL) + (hotel_id IS NOT NULL) + (cab_type_id IS NOT NULL) = 1)
 );
 CREATE INDEX IF NOT EXISTS idx_items_itinerary ON itinerary_items(itinerary_id);
+
+-- ── Audit log, filled by triggers ───────────────────────────────────
+-- No foreign keys on purpose: history must survive if a trip or booking is later deleted.
+CREATE TABLE IF NOT EXISTS booking_audit (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  item_id      INTEGER NOT NULL,
+  itinerary_id INTEGER NOT NULL,
+  action       TEXT NOT NULL CHECK (action IN ('booked','cancelled')),
+  total_price  INTEGER NOT NULL,
+  at           TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+
+CREATE TRIGGER IF NOT EXISTS trg_items_audit_insert
+AFTER INSERT ON itinerary_items
+BEGIN
+  INSERT INTO booking_audit (item_id, itinerary_id, action, total_price)
+  VALUES (NEW.id, NEW.itinerary_id, 'booked', NEW.total_price);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_items_audit_cancel
+AFTER UPDATE OF status ON itinerary_items
+WHEN OLD.status = 'booked' AND NEW.status = 'cancelled'
+BEGIN
+  INSERT INTO booking_audit (item_id, itinerary_id, action, total_price)
+  VALUES (NEW.id, NEW.itinerary_id, 'cancelled', NEW.total_price);
+END;
+
+-- Cancelling releases seats/rooms, so a cancelled booking must never silently come back.
+CREATE TRIGGER IF NOT EXISTS trg_items_no_reactivate
+BEFORE UPDATE OF status ON itinerary_items
+WHEN OLD.status = 'cancelled' AND NEW.status <> 'cancelled'
+BEGIN
+  SELECT RAISE(ABORT, 'A cancelled booking cannot be re-activated');
+END;
+
+-- ── Views ───────────────────────────────────────────────────────────
+CREATE VIEW IF NOT EXISTS v_flight_routes AS
+SELECT f.flight_number, f.airline_name, oc.name AS from_city, dc.name AS to_city,
+       f.dep_time, f.arr_time, f.duration_min, f.stops, f.cabin, f.base_price, f.seats_left
+FROM flights f
+JOIN airports oa ON oa.iata = f.origin_iata JOIN cities oc ON oc.id = oa.city_id
+JOIN airports da ON da.iata = f.dest_iata   JOIN cities dc ON dc.id = da.city_id;
+
+-- Every (boarding stop, later stop) pair of every train, i.e. every journey a passenger can book.
+CREATE VIEW IF NOT EXISTS v_train_segments AS
+SELECT t.number, t.name, t.category,
+       os.code AS from_code, oc.name AS from_city, so.dep_time,
+       ds.code AS to_code,   dc.name AS to_city,   sd.arr_time,
+       (sd.day_offset - so.day_offset) AS days_later,
+       (sd.distance_km - so.distance_km) AS km
+FROM train_stops so
+JOIN train_stops sd ON sd.train_number = so.train_number AND sd.seq > so.seq
+JOIN trains t ON t.number = so.train_number
+JOIN stations os ON os.code = so.station_code JOIN cities oc ON oc.id = os.city_id
+JOIN stations ds ON ds.code = sd.station_code JOIN cities dc ON dc.id = ds.city_id;
+
+CREATE VIEW IF NOT EXISTS v_hotel_catalog AS
+SELECT h.id, h.name, c.name AS city, h.area, h.stars, h.rating, h.price_per_night, h.rooms_left,
+       (SELECT group_concat(a.code, ', ') FROM hotel_amenities ha JOIN amenities a ON a.id = ha.amenity_id
+        WHERE ha.hotel_id = h.id) AS amenities
+FROM hotels h JOIN cities c ON c.id = h.city_id;
+
+CREATE VIEW IF NOT EXISTS v_trip_summary AS
+SELECT i.id AS trip_id, u.email, i.title, i.destination, i.start_at,
+       COUNT(CASE WHEN it.status = 'booked' THEN 1 END) AS active_bookings,
+       COALESCE(SUM(CASE WHEN it.status = 'booked' THEN it.total_price END), 0) AS booked_total
+FROM itineraries i
+JOIN users u ON u.id = i.user_id
+LEFT JOIN itinerary_items it ON it.itinerary_id = i.id
+GROUP BY i.id;

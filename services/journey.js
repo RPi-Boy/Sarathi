@@ -366,7 +366,7 @@ const proposeJourney = (db, filters) => {
 };
 
 const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
-const when = (at) => at.replace('T', ' ');
+const when = (at) => `${new Date(`${at.slice(0, 10)}T00:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })} ${at.replace('T', ' ')}`;
 
 // Plain-language lines for the itinerary prompt, so the written plan uses the real times.
 const summarizeJourney = (journey) =>

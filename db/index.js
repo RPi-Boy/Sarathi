@@ -1,10 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
+const { roadKm, cabMinutes } = require('../services/geo');
 
 const DB_PATH = process.env.SARATHI_DB_PATH || path.join(__dirname, '..', 'data', 'sarathi.db');
 const LEGACY_USERS_JSON = path.join(__dirname, '..', 'data', 'users.json');
-const SCHEMA_VERSION = '4';
+const SCHEMA_VERSION = '5';
 
 const columns = (db, table) => db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
 
@@ -46,6 +47,9 @@ const open = (dbPath = DB_PATH) => {
   if (dbPath !== ':memory:') fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath);
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
+  // SQLite has no stored procedures; user-defined SQL functions are the equivalent for reusable calculations.
+  db.function('road_km', { deterministic: true }, (lat1, lng1, lat2, lng2) => roadKm({ lat: lat1, lng: lng1 }, { lat: lat2, lng: lng2 }));
+  db.function('cab_minutes', { deterministic: true }, (km) => cabMinutes(km));
   const rebuildItems = migrate(db);
   db.exec(fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf-8'));
   if (rebuildItems) {
